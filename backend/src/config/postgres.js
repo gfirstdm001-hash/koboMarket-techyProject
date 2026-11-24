@@ -1,19 +1,24 @@
-const {Sequelize} = require('sequelize');
+import Sequelize from 'sequelize'
+import {env} from './env.js'
+import {logger} from './logger.js'
 
-const sequelize = new Sequelize(process.env.PSDB_URI, {
-    host: process.env.PSDB_HOST,
-    dialect: 'postgres',
-    logging: console.log
-});
-  
-const connectPsdb = async () => {
-    try {
-        await sequelize.authenticate();
-        console.log('Connection to PostgreSQL database established successfully.');
-    } catch (error) {
-        console.error('Unable to connect to the PostgreSQL database:', error);
-        throw error;
-    }
-};
+const sequelize = new Sequelize (env.postgresUrl,{dialect: 'postgres',
+  logging: (msg) => logger.debug(msg),
+  pool: {
+    max: 10,
+    min: 0,
+    acquire: 30000,
+    idle: 10000,
+  },
+}
 
-module.exports = {sequelize, connectPsdb};
+);
+export async function connectPostgres() {
+  try {
+    await sequelize.authenticate();
+    logger.info('PostgreSQL connected successfully');
+  } catch (err) {
+    logger.error({ err }, 'PostgreSQL connection failed');
+    process.exit(1);
+  }
+}

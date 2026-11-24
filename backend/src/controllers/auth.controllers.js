@@ -1,9 +1,12 @@
-const User = require('../models/mongo/user.models');
-const bcrypt = require('bcrypt');
-const crypto = require('crypto');
-const jwt = require('jsonwebtoken');
-const { isLoginBlocked, recordFailedLogin, clearFailedLogins } = require('../services/login-attempts.service');
-const { provisionWalletForUser } = require('../services/wallet-provisioning.service');
+import User from '../models/mongo/user.models.js';
+import bcrypt from 'bcrypt';
+import crypto from 'node:crypto';
+import jwt from 'jsonwebtoken';
+import loginAttemptsService from '../services/login-attempts.service.js';
+import walletProvisioningService from '../services/wallet-provisioning.service.js';
+
+const { isLoginBlocked, recordFailedLogin, clearFailedLogins } = loginAttemptsService;
+const { provisionWalletForUser } = walletProvisioningService;
 
 
 const hashToken = (token) => crypto.createHash('sha256').update(String(token), 'utf8').digest('hex');
@@ -438,7 +441,7 @@ const resetPassword = async (req, res) => {
     }
 };
 
-module.exports = {
+export {
     registerUser,
     verifyEmail,
     loginUser,

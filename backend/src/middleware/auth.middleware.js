@@ -1,7 +1,7 @@
-const JWT = require('jsonwebtoken');
-const User = require('../models/mongo/user.models');
+import JWT from 'jsonwebtoken';
+import User from '../models/mongo/user.models.js';
 
-const authenticateUser = async (req, res, next) => {
+export const authenticateUser = async (req, res, next) => {
     const authorization = req.headers.authorization;
     if (!authorization || !authorization.startsWith('Bearer ')) {
         return res.status(401).json({ message: 'Bearer authorization is required' });
@@ -40,4 +40,3 @@ const authenticateUser = async (req, res, next) => {
     }
 };
 
-module.exports = authenticateUser;

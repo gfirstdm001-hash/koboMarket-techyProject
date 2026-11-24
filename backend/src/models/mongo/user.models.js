@@ -1,91 +1,87 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose'
 
-const refreshSessionSchema = new mongoose.Schema({
-    sessionId: {
-        type: String,
-        required: true
+const refreshSessionSchema = new mongoose.schema(
+    {
+        tokenHash:{
+            type:String,
+            required:true
+        },
+        isRevoked:{
+            type:Boolean,
+            default:false
+        },
+        expiresAt:{
+            type:Date,
+            required:true
+        },
     },
-    tokenHash: {
-        type: String,
-        default: null
-    },
-    usedTokenHashes: {
-        type: [String],
-        default: []
-    },
-    expiresAt: {
-        type: Date,
-        required: true
-    },
-    revokedAt: {
-        type: Date,
-        default: null
-    }
-}, { _id: false });
+        {_id:false, timestamps:true}
+);
 
-const userSchema = new mongoose.Schema({
-    firstName: {
-        type: String,
-        required: true
-    },
-    lastName: { 
-        type: String,
-        required: true
-    },
-    email: {
-        type: String,
-        required: [true, 'Email is required'],
-        lowercase: true,
-        trim: true,
-        unique: true
-    },
-    password: {
-        type: String,
-        required: [true, 'Password is required'],
-        minlength: 8
-    },
-    roles: {
-        type: [String],
-        enum: ['buyer', 'vendor', 'admin'],
-        default: ['buyer']
-    },
-    
-    otp: {
-        type: String,
-        select: false,
-    
-    },
-    otpExpiresAt: {
-        type: Date,
-        select: false
-    },
-    isEmailVerified: {
-        type: Boolean,
-        default: false
-    },
-    walletProvisioningStatus: {
-        type: String,
-        enum: ['pending', 'ready'],
-        default: 'pending'
-    },
-    refreshSessions: {
-        type: [refreshSessionSchema],
-        default: [],
-        select: false
-    },
-    passwordResetTokenHash: {
-        type: String,
-        select: false
-    },
-    passwordResetExpiresAt: {
-        type: Date,
-        select: false
-    }
-}, {
-    timestamps: true,
-    versionKey: false
-});
 
-const User = mongoose.model('User', userSchema);
+const userSchema = new mongoose.schema (
+    {
+        firstName:{
+            type:String,
+            required:true
+        },
+        lastName:{
+            type:String,
+            required:true
+        },
+        email:{
+            type:String,
+            required:true,
+            unique:true
+        },
+        password:{
+            type:String,
+            required:true,
+            minLength:8
+        },
+        roles: {
+      type: [String],
+      enum: ['buyer', 'vendor', 'admin'],
+      default: ['buyer'],
+    },
+        isEmailVerified:{
+            type:Boolean,
+            default:false
+        },
+        emailVerifyTokenHash:{
+            type:String,
+            default:null
+        },
+        emailVerifyTokenHashExpiresAt:{
+            type:Date,
+            default:null
+        },
+        resetPasswordTokenHash:{
+            type:String,
+            default:null
+        },
+        resetPasswordTokenHashExpiresAt:{
+             type:Date,
+             default:null
+        },
+        isFrozen:{
+            type: Boolean, default: false },
+    refreshTokens: { type: [refreshTokenSubSchema], default: [] },
 
-module.exports = User;
+    vendorProfile: {
+      status: {
+        type: String,
+        enum: ['none', 'pending', 'approved', 'rejected'],
+        default: 'none',
+      },
+      storeName: { type: String, trim: true },
+      description: { type: String, trim: true },
+      bankCode: { type: String, trim: true },
+      accountNumber: { type: String, trim: true },
+      accountName: { type: String, trim: true },
+    },
+},
+  {timestamps: true }
+);
+
+export const User = mongoose.model('User', userSchema);
