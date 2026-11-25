@@ -8,10 +8,9 @@ export const env = {
   
   mongoUri: process.env.MONGO_URI,
   postgresUrl: process.env.POSTGRES_URL,
+ 
 
-  nodeEnv:process.env.NODE_ENV|| development,
-
-  jwtAccessSecret: process.env.JWT_ACCESS_SECRET,
+  jwtAccessSecret: process.env.JWT_ACCESS_SECRET || process.env.JWT_ACCESS_KEY,
   jwtRefreshSecret: process.env.JWT_REFRESH_SECRET,
   jwtAccessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
   jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-const refreshSessionSchema = new mongoose.schema(
+const refreshSessionSchema = new mongoose.Schema(
     {
         tokenHash:{
             type:String,
@@ -19,7 +19,7 @@ const refreshSessionSchema = new mongoose.schema(
 );
 
 
-const userSchema = new mongoose.schema (
+const userSchema = new mongoose.Schema(
     {
         firstName:{
             type:String,
@@ -34,7 +34,7 @@ const userSchema = new mongoose.schema (
             required:true,
             unique:true
         },
-        password:{
+        passwordHash:{
             type:String,
             required:true,
             minLength:8
@@ -52,7 +52,7 @@ const userSchema = new mongoose.schema (
             type:String,
             default:null
         },
-        emailVerifyTokenHashExpiresAt:{
+        emailVerifyExpires:{
             type:Date,
             default:null
         },
@@ -60,13 +60,13 @@ const userSchema = new mongoose.schema (
             type:String,
             default:null
         },
-        resetPasswordTokenHashExpiresAt:{
+        resetPasswordExpires:{
              type:Date,
              default:null
         },
         isFrozen:{
             type: Boolean, default: false },
-    refreshTokens: { type: [refreshTokenSubSchema], default: [] },
+    refreshTokens: { type: [refreshSessionSchema], default: [] },
 
     vendorProfile: {
       status: {

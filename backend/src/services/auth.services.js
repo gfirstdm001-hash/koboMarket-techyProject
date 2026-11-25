@@ -1,6 +1,6 @@
-import bcrypt from 'bcryptjs'
+import bcrypt from 'bcrypt'
 import crypto from 'node:crypto'
-import jweb from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 import {env} from '../config/env.js'
 import {logger} from '../config/logger.js'
 import {User} from '../models/mongo/user.models.js'
@@ -95,7 +95,7 @@ export async function verifyEmail(token) {
 
 export async function login({ email, password }) {
   const user = await User.findOne({ email });
-    const comparePassword = await bcrypt.compare(password, user.passwordHash);
+  const comparePassword = user ? await bcrypt.compare(password, user.passwordHash) : false;
   if (!user || !comparePassword) {
     throw new AppError(401, 'INVALID_CREDENTIALS', 'Invalid email or password');
   }
@@ -115,7 +115,7 @@ export async function login({ email, password }) {
   };
 }
 
-export async function refreshAcess(rawRefreshToken) {
+export async function refreshAccess(rawRefreshToken) {
   const incomingHash = hashToken(rawRefreshToken);
   const user = await User.findOne({ 'refreshTokens.tokenHash': incomingHash });
 
@@ -184,4 +184,3 @@ export async function resetPassword(token, newPassword) {
   user.refreshTokens = [];
   await user.save();
 }
-

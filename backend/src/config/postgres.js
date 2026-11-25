@@ -2,7 +2,7 @@ import Sequelize from 'sequelize'
 import {env} from './env.js'
 import {logger} from './logger.js'
 
-const sequelize = new Sequelize (env.postgresUrl,{dialect: 'postgres',
+export const sequelize = new Sequelize (env.postgresUrl,{dialect: 'postgres',
   logging: (msg) => logger.debug(msg),
   pool: {
     max: 10,
@@ -19,6 +19,6 @@ export async function connectPostgres() {
     logger.info('PostgreSQL connected successfully');
   } catch (err) {
     logger.error({ err }, 'PostgreSQL connection failed');
-    process.exit(1);
+    throw err;
   }
 }

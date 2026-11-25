@@ -1,42 +1,33 @@
-import JWT from 'jsonwebtoken';
-import User from '../models/mongo/user.models.js';
+import jwt from 'jsonwebtoken';
+import { User } from '../models/mongo/user.models.js';
+import { AppError } from '../utils/appError.js'
+import { env } from '../config/env.js'
 
-export const authenticateUser = async (req, res, next) => {
-    const authorization = req.headers.authorization;
-    if (!authorization || !authorization.startsWith('Bearer ')) {
-        return res.status(401).json({ message: 'Bearer authorization is required' });
+export async function authenticate(req, res, next) {
+    try{
+    const authUser = req.headers.authorization;
+    if(!authUser || !authUser.startsWith('Bearer')){
+        return next(new AppError(404, 'UNAUTHORIZED', 'Missing or invalid authorization header'))
+    }
+    const token = authUser.slice(7).trim();
+    try{
+    const decoded = jwt.verify(token, env.jwtAccessSecret);
+   } catch{
+    return next(new AppError(401, 'TOKEN_INVALID', 'Access token is invalid or expired'))
+}
+   const user = await User.findById(decoded.id).select('-passwordHash, -emailVerifyTokenHash, -refreshTokens, -resetPasswordTokenHash');
+  if (!user) {
+      return next(new AppError(401, 'USER_NOT_FOUND', 'User belonging to this token no longer exists'));
     }
 
-    const token = authorization.slice('Bearer '.length).trim();
-    if (!token) {
-        return res.status(401).json({ message: 'Token is required' });
+    if (user.isFrozen) {
+      return next(new AppError(403, 'ACCOUNT_FROZEN', 'Your account has been frozen by an administrator'));
     }
 
-    if (!process.env.JWT_SECRET) {
-        console.error('JWT_SECRET is not configured');
-        return res.status(500).json({ message: 'Authentication is not configured' });
+    req.user = user;
+    next();
+    } catch(err){
+        next(err)
     }
 
-    try {
-        const decodedToken = JWT.verify(token, process.env.JWT_SECRET);
-        if (decodedToken.type !== 'access' || !decodedToken.id) {
-            return res.status(401).json({ message: 'Invalid access token' });
-        }
-
-        const authenticatedUser = await User.findById(decodedToken.id).select('_id email roles');
-        if (!authenticatedUser) {
-            return res.status(401).json({ message: 'Invalid access token' });
-        }
-
-        req.user = authenticatedUser;
-        return next();
-    } catch (error) {
-        if (['JsonWebTokenError', 'TokenExpiredError', 'NotBeforeError'].includes(error.name)) {
-            return res.status(401).json({ message: 'Invalid or expired access token' });
-        }
-
-        console.error('Authentication failed:', error);
-        return res.status(500).json({ message: 'Authentication failed' });
-    }
-};
-
+}
